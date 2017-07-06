@@ -1,0 +1,21 @@
+{
+  "events": [
+    {
+      "actionPathID": "ABC",
+      "name": "Data Submission Type ABC",
+      "initialAction": "filePicker",
+      "initialHandler": "test_file_listing.peb",
+      "followOnHandlers": {}
+    },
+    {
+      "actionPathID": "XYZ",
+      "name": "Data Submission Type XYZ",
+      "initialAction": "Filesystem/Path/TO/executable.jar",
+      "initialHandler": "initial_form_XYZ.peb",
+      "followOnHandlers": {
+        "response_id_1": "response_template_XYZ_response_id_1.peb", 
+        "response_id_2": "response_template_XYZ_response_id_2.peb" 
+      }
+    }
+  ]
+}

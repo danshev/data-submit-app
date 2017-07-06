@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jms="http://www.springframework.org/schema/jms"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:task="http://www.springframework.org/schema/task" xmlns:int="http://www.springframework.org/schema/integration"
+	xmlns:int-http="http://www.springframework.org/schema/integration/http"
+	xmlns:int-file="http://www.springframework.org/schema/integration/file"
+	xmlns:int-ip="http://www.springframework.org/schema/integration/ip"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms-3.1.xsd
+http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context-3.1.xsd
+        http://www.springframework.org/schema/task
+        http://www.springframework.org/schema/task/spring-task-3.1.xsd
+        http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration.xsd
+        http://www.springframework.org/schema/integration/file http://www.springframework.org/schema/integration/file/spring-integration-file.xsd
+        http://www.springframework.org/schema/integration/ip http://www.springframework.org/schema/integration/ip/spring-integration-ip.xsd
+        http://www.springframework.org/schema/integration/http http://www.springframework.org/schema/integration/http/spring-integration-http.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+
+	<context:annotation-config />
+	<context:component-scan base-package="danshev.spring" />
+	<context:property-placeholder location="file:config.properties" />
+
+	<task:annotation-driven />
+
+	<context:mbean-export />
+
+
+	<bean name="nifiExporter"
+		class="org.springframework.remoting.httpinvoker.SimpleHttpInvokerServiceExporter">
+		<property name="service" ref="nifiService" />
+		<property name="serviceInterface" value="danshev.spring.service.NiFiService" />
+	</bean>
+
+
+	<bean id="httpServer"
+		class="org.springframework.remoting.support.SimpleHttpServerFactoryBean">
+		<property name="contexts">
+			<util:map>
+				<entry key="/remoting/NiFiService" value-ref="nifiExporter" />
+			</util:map>
+		</property>
+		<property name="port" value="#{${status.port}+1}" />
+	</bean>
+
+</beans>

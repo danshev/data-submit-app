@@ -1,4 +1,4 @@
-package danshev;
+package danshev.model;
 
 import java.util.List;
 

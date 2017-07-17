@@ -15,8 +15,8 @@ import java.util.TimerTask;
 import com.google.common.io.Files;
 import com.google.gson.Gson;
 
-import danshev.Event;
-import danshev.Events;
+import danshev.model.Event;
+import danshev.model.Events;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;

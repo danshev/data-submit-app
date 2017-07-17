@@ -1,4 +1,6 @@
-package danshev;
+package danshev.model;
+
+import danshev.FollowOnHandlers;
 
 public class Event {
     public String actionPathID;

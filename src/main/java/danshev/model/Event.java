@@ -11,7 +11,7 @@ public class Event implements Serializable {
     public String name;
     public String initialAction;
     public String initialHandler;
-    public FollowOnHandlers followOnHandlers;
+    public Map<String, String> followOnHandlers;
 
     @Override
     public String toString() {

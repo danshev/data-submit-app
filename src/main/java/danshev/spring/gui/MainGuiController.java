@@ -116,6 +116,7 @@ public class MainGuiController implements Initializable {
 			//  - hide folder picker
 			selectFolderButton.setVisible(false);
 			//  - load blank browser area
+			// ???
 		}
 	}
 
@@ -260,8 +261,8 @@ public class MainGuiController implements Initializable {
 		context.put("responseData", userInputData.responseData);
 
 		// TODO:
-		//	- using `userInputData.responseID`, access the SELECTED EVENT'S `followOnHandlers` JSON object ==> get filename of template
-		String followOnTemplate = "follow_on_handler.peb";	// ONLY TEMPORARY
+		//	- validate that this correctly uses `userInputData.responseID`, accesses the SELECTED EVENT'S `followOnHandlers` JSON object, and gets the template filename
+		String followOnTemplate = selectionOptions.getValue().followOnHandlers.get(userInputData.responseID).toString();
 
 		try {
 			templateService.getTemplate(followOnTemplate).evaluate(writer, context);

@@ -232,6 +232,9 @@ public class MainGuiController implements Initializable {
 		
 		context.put("rawFiles", rawFiles);
 		context.put("processedFiles", processedFiles);
+		context.put("server_port_url", nifiAddr + ":" + nifiPort + nifiRoute);
+		context.put("action_path_id", selectionOptions.getValue().actionPathID);
+
 		try {
 			templateService.getTemplate(selectionOptions.getValue().initialHandler).evaluate(writer, context);
 		} catch (PebbleException e) {

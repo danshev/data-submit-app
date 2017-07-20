@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Follow-on Handler</title>
+<script src="jquery-3.2.1.min.js"></script>
+</head>
+<body>
+
+	<h3>Here is the data from NiFi</h3>
+
+	{% if responseData.signals is not empty %}
+		<h4>Signals</h4>
+		<ul>
+			{% for signal in responseData.signals %}
+				<li>{{ signal }}</li>
+			{% endfor %}
+		</ul>
+	{% endif %}
+
+</body>
+</html>
+
+<script type='text/javascript'>
+	$(document).ready(function() {
+		console.log("document ready");
+	});
+</script>

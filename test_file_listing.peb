@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Data Submission</title>
+<script src="jquery-3.2.1.min.js"></script>
+</head>
+<body>
+
+	<div id="data">
+		<h3>Required Metadata</h3>
+		<div id="metadata">
+			<label for="serial_number">Serial Number</label>
+			<input type="text" name="serial_number" id="serial_number" placeholder="ex: 8142"><br>
+		</div>
+
+	  	<h3>Files to be Submitted</h3>
+	    	{% if rawFiles is not empty %}
+				<h4>Raw</h4>
+				{% for file in rawFiles %}
+					<input type="text" name="raw-{{ loop.index }}" size=75 value="{{ file.path }}{{ file.name }}" readonly><br>
+				{% endfor %}
+			{% endif %}
+			{% if processedFiles is not empty %}
+				<h4>Processed</h4>
+				{% for file in processedFiles %}
+					<input type="text" name="processed-{{ loop.index }}" size=75 value="{{ file.path }}{{ file.name }}" readonly><br>
+				{% endfor %}
+			{% endif %}
+
+	  	<br>
+	  	<input type="submit" value="Submit">
+	</div>
+
+</body>
+</html>
+
+<script type='text/javascript'>
+	$(document).ready(function() {
+
+		function prep_JSON_data() {
+			
+			// Build the payload
+			var payload = {};
+			payload.nifi_target = {{ server_port_url }};
+			payload.action_path_id = {{ action_path_id }};
+		    payload.metadata = {};
+			payload.files = [];
+		    
+		    // Populate the METADATA portion of the payload
+		    $("#metadata input").each(function(index){
+		    	payload.metadata[$(this).attr('id')] = $(this).val();
+		    });
+
+			// Populate the RAW data files portion of the payload
+			$("input[type='text'][name*='raw-']").each(function(index) {
+				payload.files.push({ path_filename: $(this).val(), is_raw: true });
+			});
+
+			// Populate the PROCESSED data files portion of the payload
+			$("input[type='text'][name*='processed-']").each(function(index) {
+				payload.files.push({ path_filename: $(this).val(), is_raw: false });
+			});
+
+			return JSON.stringify(payload);
+		};
+
+		// console.log(prep_JSON_data());
+
+		// jQuery.post("/formSubmit", payload, function(res){ console.log(res); }, "json");
+	});
+</script>
+

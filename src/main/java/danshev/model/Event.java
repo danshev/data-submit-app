@@ -1,9 +1,13 @@
 package danshev.model;
 
+import java.io.Serializable;
+
 import danshev.FollowOnHandlers;
 
-public class Event {
-    public String actionPathID;
+public class Event implements Serializable {
+	private static final long serialVersionUID = 1L;
+	
+	public String actionPathID;
     public String name;
     public String initialAction;
     public String initialHandler;

@@ -1,11 +1,22 @@
 package danshev.spring.gui;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import danshev.model.FileData;
+import danshev.model.FolderPathData;
+import danshev.model.UserInputData;
+import danshev.spring.service.TemplateService;
+import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -19,10 +30,23 @@ public class MainGui implements InitializingBean {
     @Autowired
     private ScreensController bean;
 
+    @Autowired
+    private TemplateService templateService;
+    
+    private MainGuiController controller;
+    
+    private List<FileData> rawFiles = new ArrayList<>();
+    
+    private Stage window;
+    
     public void setScreensController(ScreensController controller) {
         this.bean = controller;
     }
-
+    
+    public MainGuiController getController() {
+    	return controller;
+    }
+    
     @Override
     public void afterPropertiesSet() throws Exception {
 
@@ -34,11 +58,12 @@ public class MainGui implements InitializingBean {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        MainGuiController controller = loader.getController();
-
+        controller = loader.getController();
+        controller.setTemplateService(templateService);
+        
         Scene scene = new Scene(mainPane);
 
-        Stage window = new Stage();
+        window = new Stage();
 
         window.setTitle("Data Submit App");
         window.setScene(scene);
@@ -49,5 +74,61 @@ public class MainGui implements InitializingBean {
         });
         window.show();
     }
+
+	public void renderUserInput(UserInputData userInputData) {
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				controller.renderUserInput(userInputData);
+				if(!window.isFocused()) {
+					window.hide();
+					window.show();
+				}
+			}
+		}); 
+	}
+
+	public void processFolderPathRaw(FolderPathData folderPath) {
+		rawFiles = new ArrayList<>();
+		
+		addFiles(rawFiles, new File(folderPath.location));
+
+		if(folderPath.processing) {
+			//TODO run initialAction executable
+		} else {
+			Platform.runLater(new Runnable() {
+				@Override
+				public void run() {
+					controller.renderFolderPathRaw(rawFiles);
+				}
+			}); 
+		}
+	}
+
+	private void addFiles(List<FileData> files, File location) {
+		Collection<File> fileList = FileUtils.listFilesAndDirs(location, TrueFileFilter.TRUE, TrueFileFilter.TRUE);
+		
+		for(File file:fileList) {
+			if(!file.isDirectory()) {
+				files.add(new FileData(file.getParent(), file.getName()));
+			}
+		}
+		
+	}
+
+	public void processFolderPathProcessed(FolderPathData folderPath) {
+		List<FileData> processedFiles = new ArrayList<>();
+		
+		addFiles(processedFiles, new File(folderPath.location));
+
+		processedFiles.addAll(rawFiles);
+		
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				controller.renderFolderPathRaw(processedFiles);
+			}
+		}); 
+	}
 
 }

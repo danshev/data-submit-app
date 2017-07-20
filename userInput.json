@@ -1,0 +1,6 @@
+{
+	"responseID": "a1b2c3",
+	"responseData": { 
+		"signals": [ "theta_xy", "theta_yz", "theta_zx" ]
+	}
+}

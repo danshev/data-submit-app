@@ -10,8 +10,6 @@ public interface NiFiService {
 
 	void renderUserInput(UserInputData userInputData);
 
-	void processFolderPathRaw(FolderPathData folderPath);
-
-	void processFolderPathProcessed(FolderPathData folderPath);
+	void processFolderPath(FolderPathData params);
 
 }

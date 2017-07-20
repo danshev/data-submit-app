@@ -75,6 +75,49 @@ public class MainGui implements InitializingBean {
         window.show();
     }
 
+    private void addFiles(List<FileData> files, File location) {
+		Collection<File> fileList = FileUtils.listFilesAndDirs(location, TrueFileFilter.TRUE, TrueFileFilter.TRUE);
+		
+		for(File file:fileList) {
+			if(!file.isDirectory()) {
+				files.add(new FileData(file.getParent(), file.getName()));
+			}
+		}
+	}
+
+	public void processFolderPathRaw(FolderPathData params) {
+		rawFiles = new ArrayList<>();
+		
+		addFiles(rawFiles, new File(params.location));
+
+		if(params.processing) {
+			// TODO:
+			//	- execute file, located at path specified by: `initialAction` value
+			System.out.println("==> run initialAction executable");
+
+		} else {
+			Platform.runLater(new Runnable() {
+				@Override
+				public void run() {
+					controller.renderInitialHandler(rawFiles, null);
+				}
+			}); 
+		}
+	}
+
+	public void processFolderPathProcessed(FolderPathData params) {
+		List<FileData> processedFiles = new ArrayList<>();
+		
+		addFiles(processedFiles, new File(params.location));
+
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				controller.renderInitialHandler(rawFiles, processedFiles);
+			}
+		}); 
+	}
+
 	public void renderUserInput(UserInputData userInputData) {
 		Platform.runLater(new Runnable() {
 			@Override
@@ -84,49 +127,6 @@ public class MainGui implements InitializingBean {
 					window.hide();
 					window.show();
 				}
-			}
-		}); 
-	}
-
-	public void processFolderPathRaw(FolderPathData folderPath) {
-		rawFiles = new ArrayList<>();
-		
-		addFiles(rawFiles, new File(folderPath.location));
-
-		if(folderPath.processing) {
-			//TODO run initialAction executable
-		} else {
-			Platform.runLater(new Runnable() {
-				@Override
-				public void run() {
-					controller.renderFolderPathRaw(rawFiles);
-				}
-			}); 
-		}
-	}
-
-	private void addFiles(List<FileData> files, File location) {
-		Collection<File> fileList = FileUtils.listFilesAndDirs(location, TrueFileFilter.TRUE, TrueFileFilter.TRUE);
-		
-		for(File file:fileList) {
-			if(!file.isDirectory()) {
-				files.add(new FileData(file.getParent(), file.getName()));
-			}
-		}
-		
-	}
-
-	public void processFolderPathProcessed(FolderPathData folderPath) {
-		List<FileData> processedFiles = new ArrayList<>();
-		
-		addFiles(processedFiles, new File(folderPath.location));
-
-		processedFiles.addAll(rawFiles);
-		
-		Platform.runLater(new Runnable() {
-			@Override
-			public void run() {
-				controller.renderFolderPathRaw(processedFiles);
 			}
 		}); 
 	}

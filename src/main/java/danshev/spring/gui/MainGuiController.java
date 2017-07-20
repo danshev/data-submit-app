@@ -69,6 +69,8 @@ public class MainGuiController implements Initializable {
 	private String nifiAddr;
 	private Integer nifiPort;
 	private String nifiRoute;
+	private boolean standaloneMode;
+	private boolean nifiReachable;
 	private Events events;
 	private TemplateService templateService;
 
@@ -102,10 +104,18 @@ public class MainGuiController implements Initializable {
 			int code = connection.getResponseCode();
 			System.out.println("RESPONSE: " + code);
 			setLabel("Connected to NiFi server at " + nifiAddr + ":" + nifiPort + nifiRoute, code == 405);
-		} catch (Exception e) {
-			setLabel("NiFi server unreachable; operating in standalone mode", false);
-		}
+			nifiReachable = true;
 
+		} catch (Exception e) {
+			setLabel("NiFi server unreachable", false);
+			nifiReachable = false;
+
+			// TODO:
+			//  Essentially, prevent the User from doing anything, so ...
+			//  - hide folder picker
+			selectFolderButton.setVisible(false);
+			//  - load blank browser area
+		}
 	}
 
 	private void setLabel(String string, boolean valid) {
@@ -133,6 +143,7 @@ public class MainGuiController implements Initializable {
 			is = null;
 		}
 
+		standaloneMode = new Boolean(props.getProperty("status.standalone", true));
 		nifiAddr = props.getProperty("nifi.ip", "127.0.0.1");
 		nifiPort = new Integer(props.getProperty("nifi.port", "8080"));
 		nifiRoute = props.getProperty("nifi.route", "/contentListener");
@@ -140,23 +151,25 @@ public class MainGuiController implements Initializable {
 
 	@FXML
 	private void selectOption(ActionEvent event) {
-		selectFolderButton.setVisible(true);
+		if(nifiReachable){
+			selectFolderButton.setVisible(true);
+		};
 	}
 
 	@FXML
 	private void selectFolder(ActionEvent event) {
-		FolderPathData folderPathData = new FolderPathData();
-		folderPathData.processing = selectionOptions.getValue().initialAction != null;
-		folderPathData.location = selectFolder();
+		FolderPathData params = new FolderPathData();
+		params.processing = selectionOptions.getValue().initialAction != null;
+		params.location = selectFolder();
 		
 		try {
-		String postUrl = "http://127.0.0.1:8998/folderPathRaw";
-		HttpClient httpClient = HttpClientBuilder.create().build();
-		HttpPost post = new HttpPost(postUrl);
-		StringEntity postingString = new StringEntity(gson.toJson(folderPathData));
-		post.setEntity(postingString);
-		post.setHeader("Content-type", "application/json");
-		HttpResponse response = httpClient.execute(post);
+			String postUrl = "http://127.0.0.1:8998/folderPathRaw";
+			HttpClient httpClient = HttpClientBuilder.create().build();
+			HttpPost post = new HttpPost(postUrl);
+			StringEntity postingString = new StringEntity(gson.toJson(params));
+			post.setEntity(postingString);
+			post.setHeader("Content-type", "application/json");
+			HttpResponse response = httpClient.execute(post);
 		} catch(UnsupportedEncodingException e) {
 			e.printStackTrace();
 		} catch (ClientProtocolException e) {
@@ -213,31 +226,12 @@ public class MainGuiController implements Initializable {
 		this.templateService = templateService;
 	}
 
-	public void renderUserInput(UserInputData userInputData) {
-		Writer writer = new StringWriter();
-		Map<String, Object> context = new HashMap<>();
-
-		context.put("responseData", userInputData.responseData);
-		try {
-			templateService.getFollowOnHandlerTemplate().evaluate(writer, context);
-		} catch (PebbleException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		String content = writer.toString();
-		WebEngine engine = webView.getEngine();
-		engine.loadContent(content);
-		
-	}
-
-	public void renderFolderPathRaw(List<FileData> files) {
+	public void renderInitialHandler(List<FileData> rawFiles, List<FileData> processedFiles) {
 		Writer writer = new StringWriter();
 		Map<String, Object> context = new HashMap<>();
 		
-		context.put("files", files);
+		context.put("rawFiles", rawFiles);
+		context.put("processedFiles", processedFiles);
 		try {
 			templateService.getTemplate(selectionOptions.getValue().initialHandler).evaluate(writer, context);
 		} catch (PebbleException e) {
@@ -250,5 +244,30 @@ public class MainGuiController implements Initializable {
 		String content = writer.toString();
 		WebEngine engine = webView.getEngine();
 		engine.loadContent(content);
+	}
+
+	public void renderUserInput(UserInputData userInputData) {
+		Writer writer = new StringWriter();
+		Map<String, Object> context = new HashMap<>();
+
+		context.put("responseData", userInputData.responseData);
+
+		// TODO:
+		//	- using `userInputData.responseID`, access the SELECTED EVENT'S `followOnHandlers` JSON object ==> get filename of template
+		String followOnTemplate = "follow_on_handler.peb";	// ONLY TEMPORARY
+
+		try {
+			templateService.getTemplate(followOnTemplate).evaluate(writer, context);
+		} catch (PebbleException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		String content = writer.toString();
+		WebEngine engine = webView.getEngine();
+		engine.loadContent(content);
+		
 	}
 }

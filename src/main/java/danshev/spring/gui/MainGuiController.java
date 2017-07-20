@@ -19,6 +19,7 @@ import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.UUID;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -66,7 +67,8 @@ public class MainGuiController implements Initializable {
 	@FXML
 	private WebView webView;
 
-	private String eventUUID;
+	private UUID eventUUID;
+	private Integer myPort;
 	private String nifiAddr;
 	private Integer nifiPort;
 	private String nifiRoute;
@@ -95,6 +97,10 @@ public class MainGuiController implements Initializable {
 		}
 	}
 
+	public UUID getEventUUID() {
+		return this.eventUUID;
+  	}
+
 	protected void checkNiFi() {
 		try {
 			URL url = new URL("http://" + nifiAddr + ":" + Integer.toString(nifiPort) + nifiRoute);
@@ -103,7 +109,6 @@ public class MainGuiController implements Initializable {
 			connection.connect();
 
 			int code = connection.getResponseCode();
-			System.out.println("RESPONSE: " + code);
 			setLabel("Connected to NiFi server at " + nifiAddr + ":" + nifiPort + nifiRoute, code == 405);
 			nifiReachable = true;
 
@@ -111,12 +116,13 @@ public class MainGuiController implements Initializable {
 			setLabel("NiFi server unreachable", false);
 			nifiReachable = false;
 
-			// TODO:
 			//  Essentially, prevent the User from doing anything, so ...
-			//  - hide folder picker
+			
+			// ... hide the folder picker
 			selectFolderButton.setVisible(false);
-			//  - load blank browser area
-			// ???
+			
+			// ... blank the browser area
+			// TODO
 		}
 	}
 
@@ -145,7 +151,8 @@ public class MainGuiController implements Initializable {
 			is = null;
 		}
 
-		standaloneMode = new Boolean(props.getProperty("status.standalone", true));
+		myPort = new Integer(props.getProperty("status.port", "8998"));
+		standaloneMode = new Boolean(props.getProperty("status.standalone"));
 		nifiAddr = props.getProperty("nifi.ip", "127.0.0.1");
 		nifiPort = new Integer(props.getProperty("nifi.port", "8080"));
 		nifiRoute = props.getProperty("nifi.route", "/contentListener");
@@ -155,20 +162,21 @@ public class MainGuiController implements Initializable {
 	private void selectOption(ActionEvent event) {
 		if(nifiReachable){
 			selectFolderButton.setVisible(true);
+			eventUUID = UUID.randomUUID();
 
-			// TODO (Sprint 3)
-			// - generate a UUID (http://www.javapractices.com/topic/TopicAction.do?Id=56), store in the variable `eventUUID`
+			System.out.println(eventUUID);
 		};
 	}
 
 	@FXML
 	private void selectFolder(ActionEvent event) {
 		FolderPathData params = new FolderPathData();
-		params.processing = selectionOptions.getValue().initialAction != null;
+
 		params.location = selectFolder();
+		params.processing = selectionOptions.getValue().initialAction != null;
 		
 		try {
-			String postUrl = "http://127.0.0.1:8998/folderPathRaw";
+			String postUrl = "http://127.0.0.1:" + myPort + "/folderPathRaw";
 			HttpClient httpClient = HttpClientBuilder.create().build();
 			HttpPost post = new HttpPost(postUrl);
 			StringEntity postingString = new StringEntity(gson.toJson(params));
@@ -258,12 +266,9 @@ public class MainGuiController implements Initializable {
 		Writer writer = new StringWriter();
 		Map<String, Object> context = new HashMap<>();
 
-		context.put("responseData", userInputData.responseData);
-
-		// TODO:
-		//	- validate that this correctly uses `userInputData.responseID`, accesses the SELECTED EVENT'S `followOnHandlers` JSON object, and gets the template filename
 		String followOnTemplate = selectionOptions.getValue().followOnHandlers.get(userInputData.responseID).toString();
-
+		context.put("responseData", userInputData.responseData);
+		
 		try {
 			templateService.getTemplate(followOnTemplate).evaluate(writer, context);
 		} catch (PebbleException e) {

@@ -1,6 +1,7 @@
 package danshev.model;
 
 import java.io.Serializable;
+import java.util.Map;
 
 import danshev.FollowOnHandlers;
 

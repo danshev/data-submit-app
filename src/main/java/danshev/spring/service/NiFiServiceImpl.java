@@ -28,6 +28,7 @@ public class NiFiServiceImpl implements NiFiService {
 
 	@Override
 	public void processFolderPath(FolderPathData params) {
+
 		if (params.processing != null) {
 			mainGui.processFolderPathRaw(params);
 		} else {

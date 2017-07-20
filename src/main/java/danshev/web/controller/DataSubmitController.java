@@ -29,7 +29,7 @@ public class DataSubmitController {
     	if(!file.exists()) return "INVALID_PATH";
     	
     	Event selectedEvent = nifiService.getSelectedEvent();
-    	System.out.println("event:"+selectedEvent);
+    	// System.out.println("event:"+selectedEvent);
         return "folderPathRaw";
     }
 
@@ -46,12 +46,16 @@ public class DataSubmitController {
 
     @RequestMapping(value = "/userInput", method = RequestMethod.POST)
     public @ResponseBody String userInput(@RequestBody UserInputData userInputData) {
-    	nifiService.renderUserInput(userInputData);
+    	
+        System.out.println(userInputData.responseData);
+
+        nifiService.renderUserInput(userInputData);
 
     	// TODO: check this syntax
-    	return ResponseEntity.ok();
+    	return ""; //ResponseEntity.ok();
     }
 
+/*
     @RequestMapping(value = "/formSubmit", method = RequestMethod.POST)
     public @ResponseBody String formSubmit(@RequestBody FormData formData) {
         
@@ -60,6 +64,7 @@ public class DataSubmitController {
 
         return ResponseEntity.ok();
     }
+*/
 
     @Autowired
     private NiFiService nifiService;

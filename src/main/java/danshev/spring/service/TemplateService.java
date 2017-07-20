@@ -11,6 +11,11 @@ import com.mitchellbosecke.pebble.template.PebbleTemplate;
 public class TemplateService implements InitializingBean {
 	PebbleEngine engine = new PebbleEngine.Builder().build();
 
+	@Override
+ 	public void afterPropertiesSet() throws Exception {
+
+ 	}
+
 	public PebbleTemplate getTemplate(String template) throws PebbleException {
 		return engine.getTemplate(template);
 	}

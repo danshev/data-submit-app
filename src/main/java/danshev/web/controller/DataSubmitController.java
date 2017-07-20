@@ -52,6 +52,15 @@ public class DataSubmitController {
     	return ResponseEntity.ok();
     }
 
+    @RequestMapping(value = "/formSubmit", method = RequestMethod.POST)
+    public @ResponseBody String formSubmit(@RequestBody FormData formData) {
+        
+        // TODO (Sprint 3)
+        //  - write out submitted data in a file named `{{ uuid }}.nifi`, where UUID is the string generated when the User selected an item from the dropdown
+
+        return ResponseEntity.ok();
+    }
+
     @Autowired
     private NiFiService nifiService;
 

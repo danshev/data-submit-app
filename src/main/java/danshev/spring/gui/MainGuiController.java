@@ -66,6 +66,7 @@ public class MainGuiController implements Initializable {
 	@FXML
 	private WebView webView;
 
+	private String eventUUID;
 	private String nifiAddr;
 	private Integer nifiPort;
 	private String nifiRoute;
@@ -153,6 +154,9 @@ public class MainGuiController implements Initializable {
 	private void selectOption(ActionEvent event) {
 		if(nifiReachable){
 			selectFolderButton.setVisible(true);
+
+			// TODO (Sprint 3)
+			// - generate a UUID (http://www.javapractices.com/topic/TopicAction.do?Id=56), store in the variable `eventUUID`
 		};
 	}
 

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.HashMap;
+import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import danshev.model.Event;
 import danshev.model.FileData;
 import danshev.model.FolderPathData;
 import danshev.model.UserInputData;
@@ -25,6 +27,9 @@ import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -100,6 +105,33 @@ public class MainGui implements InitializingBean {
 		if(params.processing) {
 			// TODO:
 			//	- execute file, located at path specified by: `initialAction` value
+			Event selectedEvent = controller.getSelectedEvent();
+			if(selectedEvent.initialAction != null) {
+				File executable = new File(selectedEvent.initialAction);
+				if(!executable.exists()) {
+					Platform.runLater(new Runnable() {
+						
+						@Override
+						public void run() {
+							Alert alert = new Alert(AlertType.WARNING, "Initial action [" + selectedEvent.initialAction + "] not found.", ButtonType.OK);
+							alert.showAndWait();
+						}
+					});
+				} else {
+					String initialAction = selectedEvent.initialAction;
+					if(selectedEvent.initialAction.endsWith(".jar")) {
+						initialAction = "java -jar " + initialAction;
+					}
+					
+					try {
+						Runtime.getRuntime().exec(initialAction);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+			
 			System.out.println("==> run initialAction executable");
 
 		} else {
@@ -114,7 +146,7 @@ public class MainGui implements InitializingBean {
 
 	public void processFolderPathProcessed(FolderPathData params) {
 		List<FileData> processedFiles = new ArrayList<>();
-		
+		System.out.println("Folder Path Processed");
 		addFiles(processedFiles, new File(params.location));
 
 		Platform.runLater(new Runnable() {
@@ -161,6 +193,10 @@ public class MainGui implements InitializingBean {
 				controller.renderStatusUpdate(rawFiles, statusUpdates);
 			}
 		});
+	}
+
+	public UUID getEventUUID() {
+		return controller.getEventUUID();
 	}
 
 }

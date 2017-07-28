@@ -14,8 +14,7 @@ public class DataSubmitApp extends Application {
     private static final Log LOG = LogFactory.getLog(DataSubmitApp.class);
 
     public static void main(String[] args) throws Exception {
-
-        launch(args);
+    	launch(args);
     }
 
     @Override

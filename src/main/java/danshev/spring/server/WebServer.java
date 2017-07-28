@@ -24,7 +24,7 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 @Component
-@PropertySource("file:config.properties")
+//@PropertySource("file:config.properties")
 public class WebServer {
     private static final Log LOG = LogFactory.getLog(WebServer.class);
 
@@ -70,8 +70,9 @@ public class WebServer {
     }
 
     public boolean enabled() {
-        String enabled = environment.getProperty("status.enabled");
-        if (enabled != null && enabled.equals("1")) {
+//        String enabled = environment.getProperty("status.enabled");
+        String enabled = "1";
+    	if (enabled != null && enabled.equals("1")) {
             return true;
         }
         return false;
@@ -79,8 +80,9 @@ public class WebServer {
 
     private SelectChannelConnector createConnector() {
         SelectChannelConnector _connector = new SelectChannelConnector();
-        _connector.setPort(
-                Integer.parseInt(environment.getProperty("status.port")));
+//        _connector.setPort(
+//                Integer.parseInt(environment.getProperty("status.port")));
+        _connector.setPort(8998);
         _connector.setHost(bindInterface);
         return _connector;
     }

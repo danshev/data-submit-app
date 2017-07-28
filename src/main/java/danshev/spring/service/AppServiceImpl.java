@@ -1,5 +1,7 @@
 package danshev.spring.service;
 
+import java.util.UUID;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,11 +12,11 @@ import danshev.model.FolderPathData;
 import danshev.model.UserInputData;
 import danshev.spring.gui.MainGui;
 
-@Service("nifiService")
-public class NiFiServiceImpl implements NiFiService {
+@Service("appService")
+public class AppServiceImpl implements AppService {
 	@Autowired private MainGui mainGui;
 	
-    private static final Log LOG = LogFactory.getLog(NiFiServiceImpl.class);
+    private static final Log LOG = LogFactory.getLog(AppServiceImpl.class);
 
 	@Override
 	public Event getSelectedEvent() {
@@ -30,10 +32,16 @@ public class NiFiServiceImpl implements NiFiService {
 	public void processFolderPath(FolderPathData params) {
 
 		if (params.processing != null) {
+			System.out.println("Processing");
 			mainGui.processFolderPathRaw(params);
 		} else {
         	mainGui.processFolderPathProcessed(params);
     	}
+	}
+
+	@Override
+	public UUID getEventUUID() {
+		return mainGui.getEventUUID();
 	}
 
 }

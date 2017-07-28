@@ -7,19 +7,22 @@ http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
 http://www.springframework.org/schema/context 
 http://www.springframework.org/schema/context/spring-context-3.0.xsd">
 
-	<context:property-placeholder location="file:config.properties" />
-
+	<!-- <context:property-placeholder location="file:config.properties" />
+ 	-->
 
 	<!-- Define your application beans here. They will be available to the beans 
 		defined in your web-context because it is a sub-context. Beans defined in 
 		the web-context will not be available in the application context. -->
 
 
-	<bean id="nifiService"
+	<bean id="appService"
 		class="org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean">
+		<!-- <property name="serviceUrl"
+			value="http://127.0.0.1:#{${status.port}+1}/remoting/AppService" />
+		 -->
 		<property name="serviceUrl"
-			value="http://127.0.0.1:#{${status.port}+1}/remoting/NiFiService" />
-		<property name="serviceInterface" value="danshev.spring.service.NiFiService" />
+			value="http://127.0.0.1:8999/remoting/AppService" />
+		<property name="serviceInterface" value="danshev.spring.service.AppService" />
 	</bean>
 
 </beans>

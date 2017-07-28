@@ -38,6 +38,7 @@ import danshev.model.FileData;
 import danshev.model.FolderPathData;
 import danshev.model.UserInputData;
 import danshev.spring.service.TemplateService;
+import danshev.util.OsUtilities;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -81,7 +82,7 @@ public class MainGuiController implements Initializable {
 	public void initialize(URL location, ResourceBundle resources) {
 		loadProperties();
 		try {
-			String eventsJson = Files.toString(new File("events.json"), Charset.defaultCharset());
+			String eventsJson = Files.toString(OsUtilities.getFile("events.json"), Charset.defaultCharset());
 			Gson gson = new Gson();
 			events = gson.fromJson(eventsJson, Events.class);
 			selectionOptions.getItems().setAll(events.events);
@@ -122,7 +123,13 @@ public class MainGuiController implements Initializable {
 			selectFolderButton.setVisible(false);
 			
 			// ... blank the browser area
-			// TODO
+			Platform.runLater(new Runnable() {
+				
+				@Override
+				public void run() {
+					webView.getEngine().loadContent("");
+				}
+			});
 		}
 	}
 
@@ -143,7 +150,7 @@ public class MainGuiController implements Initializable {
 
 		// First try loading from the current directory
 		try {
-			File f = new File("config.properties");
+			File f = OsUtilities.getFile("config.properties");
 			is = new FileInputStream(f);
 			props.load(is);
 			is.close();
@@ -151,7 +158,8 @@ public class MainGuiController implements Initializable {
 			is = null;
 		}
 
-		myPort = new Integer(props.getProperty("status.port", "8998"));
+//		myPort = new Integer(props.getProperty("status.port", "8998"));
+		myPort = 8998;
 		standaloneMode = new Boolean(props.getProperty("status.standalone"));
 		nifiAddr = props.getProperty("nifi.ip", "127.0.0.1");
 		nifiPort = new Integer(props.getProperty("nifi.port", "8080"));
@@ -163,7 +171,6 @@ public class MainGuiController implements Initializable {
 		if(nifiReachable){
 			selectFolderButton.setVisible(true);
 			eventUUID = UUID.randomUUID();
-
 			System.out.println(eventUUID);
 		};
 	}
@@ -173,7 +180,7 @@ public class MainGuiController implements Initializable {
 		FolderPathData params = new FolderPathData();
 
 		params.location = selectFolder();
-		params.processing = selectionOptions.getValue().initialAction != null;
+		params.processing = getSelectedEvent().initialAction != null;
 		
 		try {
 			String postUrl = "http://127.0.0.1:" + myPort + "/folderPathRaw";
@@ -246,10 +253,10 @@ public class MainGuiController implements Initializable {
 		context.put("rawFiles", rawFiles);
 		context.put("processedFiles", processedFiles);
 		context.put("server_port_url", nifiAddr + ":" + nifiPort + nifiRoute);
-		context.put("action_path_id", selectionOptions.getValue().actionPathID);
+		context.put("action_path_id", getSelectedEvent().actionPathID);
 
 		try {
-			templateService.getTemplate(selectionOptions.getValue().initialHandler).evaluate(writer, context);
+			templateService.getTemplate(OsUtilities.getFilename(getSelectedEvent().initialHandler)).evaluate(writer, context);
 		} catch (PebbleException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -266,11 +273,11 @@ public class MainGuiController implements Initializable {
 		Writer writer = new StringWriter();
 		Map<String, Object> context = new HashMap<>();
 
-		String followOnTemplate = selectionOptions.getValue().followOnHandlers.get(userInputData.responseID).toString();
+		String followOnTemplate = getSelectedEvent().followOnHandlers.get(userInputData.responseID).toString();
 		context.put("responseData", userInputData.responseData);
 		
 		try {
-			templateService.getTemplate(followOnTemplate).evaluate(writer, context);
+			templateService.getTemplate(OsUtilities.getFilename(followOnTemplate)).evaluate(writer, context);
 		} catch (PebbleException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

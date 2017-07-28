@@ -23,17 +23,16 @@ http://www.springframework.org/schema/context
 
 	<context:annotation-config />
 	<context:component-scan base-package="danshev.spring" />
-	<context:property-placeholder location="file:config.properties" />
 
 	<task:annotation-driven />
 
 	<context:mbean-export />
 
 
-	<bean name="nifiExporter"
+	<bean name="appExporter"
 		class="org.springframework.remoting.httpinvoker.SimpleHttpInvokerServiceExporter">
-		<property name="service" ref="nifiService" />
-		<property name="serviceInterface" value="danshev.spring.service.NiFiService" />
+		<property name="service" ref="appService" />
+		<property name="serviceInterface" value="danshev.spring.service.AppService" />
 	</bean>
 
 
@@ -41,10 +40,12 @@ http://www.springframework.org/schema/context
 		class="org.springframework.remoting.support.SimpleHttpServerFactoryBean">
 		<property name="contexts">
 			<util:map>
-				<entry key="/remoting/NiFiService" value-ref="nifiExporter" />
+				<entry key="/remoting/AppService" value-ref="appExporter" />
 			</util:map>
 		</property>
-		<property name="port" value="#{${status.port}+1}" />
+		<!-- <property name="port" value="#{${status.port}+1}" /> -->
+		
+		<property name="port" value="8999" />
 	</bean>
 
 </beans>

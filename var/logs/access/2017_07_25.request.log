@@ -1,0 +1,6 @@
+127.0.0.1 -  -  [25/Jul/2017:18:27:34 +0000] "POST /folderPathRaw HTTP/1.1" 200 13  94
+127.0.0.1 -  -  [25/Jul/2017:18:27:59 +0000] "POST /folderPathProcessed HTTP/1.1" 500 5358  5
+127.0.0.1 -  -  [25/Jul/2017:18:29:40 +0000] "POST /folderPathRaw HTTP/1.1" 200 13  122
+127.0.0.1 -  -  [25/Jul/2017:18:29:42 +0000] "POST /folderPathProcessed HTTP/1.1" 500 5358  5
+127.0.0.1 -  -  [25/Jul/2017:18:34:04 +0000] "POST /folderPathRaw HTTP/1.1" 200 13  139
+127.0.0.1 -  -  [25/Jul/2017:18:34:07 +0000] "POST /folderPathProcessed HTTP/1.1" 200 19  6

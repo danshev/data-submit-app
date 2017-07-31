@@ -256,7 +256,7 @@ public class MainGuiController implements Initializable {
 		context.put("action_path_id", getSelectedEvent().actionPathID);
 
 		try {
-			templateService.getTemplate(OsUtilities.getFilename(getSelectedEvent().initialHandler)).evaluate(writer, context);
+			templateService.getTemplate(getSelectedEvent().initialHandler).evaluate(writer, context);
 		} catch (PebbleException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -277,7 +277,7 @@ public class MainGuiController implements Initializable {
 		context.put("responseData", userInputData.responseData);
 		
 		try {
-			templateService.getTemplate(OsUtilities.getFilename(followOnTemplate)).evaluate(writer, context);
+			templateService.getTemplate(followOnTemplate).evaluate(writer, context);
 		} catch (PebbleException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

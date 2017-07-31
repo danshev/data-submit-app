@@ -36,6 +36,7 @@ import danshev.model.Event;
 import danshev.model.Events;
 import danshev.model.FileData;
 import danshev.model.FolderPathData;
+import danshev.model.StatusUpdate;
 import danshev.model.UserInputData;
 import danshev.spring.service.TemplateService;
 import danshev.util.OsUtilities;
@@ -289,5 +290,27 @@ public class MainGuiController implements Initializable {
 		WebEngine engine = webView.getEngine();
 		engine.loadContent(content);
 		
+	}
+
+	public void renderStatusUpdate(List<FileData> rawFiles, List<FileData> processedFiles,
+			Map<String, List<StatusUpdate>> statusUpdates) {
+		Writer writer = new StringWriter();
+		Map<String, Object> context = new HashMap<>();
+		context.put("rawFiles", rawFiles);
+		context.put("processedFiles", processedFiles);
+		context.put("updates", statusUpdates);
+
+		try {
+			templateService.getTemplate(OsUtilities.getFilename("status.peb")).evaluate(writer, context);
+		} catch (PebbleException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		String content = writer.toString();
+		WebEngine engine = webView.getEngine();
+		engine.loadContent(content);
 	}
 }

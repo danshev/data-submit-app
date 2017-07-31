@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import danshev.model.Event;
 import danshev.model.FolderPathData;
+import danshev.model.StatusUpdate;
 import danshev.model.UserInputData;
 import danshev.spring.gui.MainGui;
 
@@ -42,6 +43,11 @@ public class AppServiceImpl implements AppService {
 	@Override
 	public UUID getEventUUID() {
 		return mainGui.getEventUUID();
+	}
+
+	@Override
+	public void statusUpdate(StatusUpdate update) {
+		mainGui.statusUpdate(update);
 	}
 
 }

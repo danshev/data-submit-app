@@ -7,6 +7,15 @@
       "followOnHandlers": {
         "a1b2c3": "follow_on_handler.peb"
       }
+    },
+    {
+      "actionPathID": "DEF",
+      "name": "TERM-generated data with initial action",
+      "initialHandler": "test_file_listing.peb",
+      "initialAction": "C:/windows/notepad.exe",
+      "followOnHandlers": {
+        "a1b2c3": "follow_on_handler.peb"
+      }
     }
   ]
 }

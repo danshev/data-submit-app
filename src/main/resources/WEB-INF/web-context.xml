@@ -48,5 +48,5 @@ http://www.springframework.org/schema/task/spring-task-3.0.xsd">
 			</list>
 		</property>
 	</bean>
-	<bean id="jsonMessageConverter" class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter"></bean>
+	<bean id="jsonMessageConverter" class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter"></bean>
 </beans>

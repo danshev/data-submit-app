@@ -16,8 +16,6 @@ public interface AppService {
 
 	void processFolderPath(FolderPathData params);
 
-	void renderStatusUpdate(StatusUpdateData statusUpdateData);
-
 	UUID getEventUUID();
 
 	void statusUpdate(StatusUpdate update);

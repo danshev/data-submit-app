@@ -175,31 +175,6 @@ public class MainGui implements InitializingBean {
 		});
 	}
 
-	public void renderStatusUpdate(StatusUpdateData statusUpdateData) {
-
-		// build a new status update from the POSTed data
-		StatusUpdate newStatusUpdate = new StatusUpdate();
-		newStatusUpdate.success = statusUpdateData.success;
-		newStatusUpdate.text = statusUpdateData.text;
-
-		// populate a list of any *existing* updates on this file from the HashMap of overall `statusUpdates` ...
-		List<StatusUpdate> currentUpdates = new ArrayList<>();
-		currentUpdates = statusUpdates.get(statusUpdateData.filename) == null ? currentUpdates : statusUpdates.get(statusUpdateData.filename);
-
-		// ... and add the new update
-		currentUpdates.add(newStatusUpdate);
-
-		// Put the (now-updated) list of updates into the overall HashMap
-		statusUpdates.put(statusUpdateData.filename, currentUpdates);
-
-		Platform.runLater(new Runnable() {
-			@Override
-			public void run() {
-				controller.renderStatusUpdate(rawFiles, statusUpdates);
-			}
-		});
-	}
-
 	public UUID getEventUUID() {
 		return controller.getEventUUID();
 	}

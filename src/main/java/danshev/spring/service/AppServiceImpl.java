@@ -42,11 +42,6 @@ public class AppServiceImpl implements AppService {
 	}
 
 	@Override
-	public void renderStatusUpdate(StatusUpdateData statusUpdateData) {
-		mainGui.renderStatusUpdate(statusUpdateData);
-	}
-
-	@Override
 	public UUID getEventUUID() {
 		return mainGui.getEventUUID();
 	}

@@ -71,15 +71,6 @@ public class DataSubmitController {
     	return "";
     }
 
-    @RequestMapping(value = "/statusUpdate", method = RequestMethod.POST)
-    public @ResponseBody String statusUpdate(@RequestBody StatusUpdateData statusUpdateData) {
-        
-        appService.renderStatusUpdate(statusUpdateData);
-
-        return "statusUpdate";
-    }
-
-
 	@RequestMapping(value = "/formSubmit", method = RequestMethod.POST)
 	public @ResponseBody String formSubmit(@RequestBody String formData) {
 		UUID eventUUID = appService.getEventUUID();

@@ -32,7 +32,7 @@ public class OsUtilities {
 		if(isOSMac()) {
 			return "../../../" + filename;
 		} else if(isOSWindows()) {
-			return filename;
+			return "./" +filename;
 		} else {
 			return filename;
 		}

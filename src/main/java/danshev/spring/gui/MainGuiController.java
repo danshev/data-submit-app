@@ -31,6 +31,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import com.google.common.io.Files;
 import com.google.gson.Gson;
 import com.mitchellbosecke.pebble.error.PebbleException;
+import com.sun.javafx.webkit.WebConsoleListener;
 
 import danshev.model.Event;
 import danshev.model.Events;
@@ -46,9 +47,12 @@ import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.web.WebEngine;
@@ -270,6 +274,23 @@ public class MainGuiController implements Initializable {
 		}
 		String content = writer.toString();
 		WebEngine engine = webView.getEngine();
+		
+		WebConsoleListener.setDefaultListener(new WebConsoleListener(){
+		    @Override
+		    public void messageAdded(WebView webView, String message, int lineNumber, String sourceId) {
+		        System.out.println("Webview Console: [" + sourceId + ":" + lineNumber + "] " + message);
+		        Platform.runLater(new Runnable() {
+					
+					@Override
+					public void run() {
+						Alert alert = new Alert(AlertType.WARNING,
+				        		"Webview Console: [" + sourceId + ":" + lineNumber + "] " + message, ButtonType.OK);
+						alert.showAndWait(); 						
+					}
+				});
+		    }
+		});
+		
 		engine.loadContent(content);
 	}
 
@@ -294,28 +315,6 @@ public class MainGuiController implements Initializable {
 		engine.loadContent(content);
 	}
 
-
-	public void renderStatusUpdate(List<FileData> rawFiles, HashMap<String, List<StatusUpdate>> statusUpdates) {
-		Writer writer = new StringWriter();
-		Map<String, Object> context = new HashMap<>();
-
-		context.put("rawFiles", rawFiles);
-		context.put("updates", statusUpdates);
-		
-		try {
-			templateService.getTemplate("status.peb").evaluate(writer, context);
-		} catch (PebbleException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		String content = writer.toString();
-		WebEngine engine = webView.getEngine();
-		engine.loadContent(content);
-	}
-
 	public void renderStatusUpdate(List<FileData> rawFiles, List<FileData> processedFiles,
 			Map<String, List<StatusUpdate>> statusUpdates) {
 		Writer writer = new StringWriter();
@@ -325,7 +324,7 @@ public class MainGuiController implements Initializable {
 		context.put("updates", statusUpdates);
 
 		try {
-			templateService.getTemplate(OsUtilities.getFilename("status.peb")).evaluate(writer, context);
+			templateService.getTemplate("status.peb").evaluate(writer, context);
 		} catch (PebbleException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

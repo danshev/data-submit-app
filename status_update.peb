@@ -1,0 +1,14 @@
+{% extends "status" %}
+
+{% block updates %}
+	<ul>
+		{% for file in rawFiles %}
+			<li>{{ file.name }}</li>
+			{% if updates contains file.name %}
+				{% for update in updates.get(file.name) %}
+					<li style="{{ update.success == 'true' ? 'red' : 'green' }};">{{ update.text }}</li>
+				{% endfor %}
+			{% endif %}
+		{% endfor %}
+	</ul>
+{% endblock %}

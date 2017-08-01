@@ -11,6 +11,7 @@ import danshev.model.Event;
 import danshev.model.FolderPathData;
 import danshev.model.StatusUpdate;
 import danshev.model.UserInputData;
+import danshev.model.StatusUpdateData;
 import danshev.spring.gui.MainGui;
 
 @Service("appService")
@@ -38,6 +39,11 @@ public class AppServiceImpl implements AppService {
 		} else {
         	mainGui.processFolderPathProcessed(params);
     	}
+	}
+
+	@Override
+	public void renderStatusUpdate(StatusUpdateData statusUpdateData) {
+		mainGui.renderStatusUpdate(statusUpdateData);
 	}
 
 	@Override

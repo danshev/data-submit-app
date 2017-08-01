@@ -6,6 +6,7 @@ import danshev.model.Event;
 import danshev.model.FolderPathData;
 import danshev.model.StatusUpdate;
 import danshev.model.UserInputData;
+import danshev.model.StatusUpdateData;
 
 public interface AppService {
 
@@ -14,6 +15,8 @@ public interface AppService {
 	void renderUserInput(UserInputData userInputData);
 
 	void processFolderPath(FolderPathData params);
+
+	void renderStatusUpdate(StatusUpdateData statusUpdateData);
 
 	UUID getEventUUID();
 

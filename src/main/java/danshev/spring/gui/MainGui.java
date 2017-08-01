@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.UUID;
 
 import org.apache.commons.io.FileUtils;
@@ -20,6 +21,10 @@ import danshev.model.FileData;
 import danshev.model.FolderPathData;
 import danshev.model.StatusUpdate;
 import danshev.model.UserInputData;
+
+import danshev.model.StatusUpdate;
+import danshev.model.StatusUpdateData;
+
 import danshev.spring.service.TemplateService;
 import javafx.application.Platform;
 import javafx.event.EventHandler;
@@ -166,6 +171,31 @@ public class MainGui implements InitializingBean {
 					window.hide();
 					window.show();
 				}
+			}
+		});
+	}
+
+	public void renderStatusUpdate(StatusUpdateData statusUpdateData) {
+
+		// build a new status update from the POSTed data
+		StatusUpdate newStatusUpdate = new StatusUpdate();
+		newStatusUpdate.success = statusUpdateData.success;
+		newStatusUpdate.text = statusUpdateData.text;
+
+		// populate a list of any *existing* updates on this file from the HashMap of overall `statusUpdates` ...
+		List<StatusUpdate> currentUpdates = new ArrayList<>();
+		currentUpdates = statusUpdates.get(statusUpdateData.filename) == null ? currentUpdates : statusUpdates.get(statusUpdateData.filename);
+
+		// ... and add the new update
+		currentUpdates.add(newStatusUpdate);
+
+		// Put the (now-updated) list of updates into the overall HashMap
+		statusUpdates.put(statusUpdateData.filename, currentUpdates);
+
+		Platform.runLater(new Runnable() {
+			@Override
+			public void run() {
+				controller.renderStatusUpdate(rawFiles, statusUpdates);
 			}
 		});
 	}

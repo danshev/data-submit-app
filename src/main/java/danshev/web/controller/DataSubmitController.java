@@ -27,6 +27,7 @@ import danshev.model.Event;
 import danshev.model.FolderPathData;
 import danshev.model.StatusUpdate;
 import danshev.model.UserInputData;
+import danshev.model.StatusUpdateData;
 import danshev.spring.service.AppService;
 import danshev.util.OsUtilities;
 
@@ -65,12 +66,19 @@ public class DataSubmitController {
 	public @ResponseBody String userInput(@RequestBody UserInputData userInputData) {
 
 		System.out.println(userInputData.responseData);
+        appService.renderUserInput(userInputData);
 
-		appService.renderUserInput(userInputData);
+    	return "";
+    }
 
-		// TODO: check this syntax
-		return ""; // ResponseEntity.ok();
-	}
+    @RequestMapping(value = "/statusUpdate", method = RequestMethod.POST)
+    public @ResponseBody String statusUpdate(@RequestBody StatusUpdateData statusUpdateData) {
+        
+        appService.renderStatusUpdate(statusUpdateData);
+
+        return "statusUpdate";
+    }
+
 
 	@RequestMapping(value = "/formSubmit", method = RequestMethod.POST)
 	public @ResponseBody String formSubmit(@RequestBody String formData) {
@@ -86,11 +94,9 @@ public class DataSubmitController {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		// TODO (Sprint 3)
-		// - write out submitted data in a file named `{{ uuid }}.nifi`, where
-		// UUID is the string generated when the User selected an item from the
-		// dropdown
-		catch (IOException e) {
+
+        //  - write out submitted data in a file named `{{ uuid }}.nifi`, where UUID is the string generated when the User selected an item from the dropdown
+        catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

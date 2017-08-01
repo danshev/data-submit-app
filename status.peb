@@ -1,0 +1,29 @@
+<html>
+	<head>
+		<title>Submission Status</title>
+	</head>
+	<body>
+		<h2>Submission Status</h2>
+		
+		<div id="updates">
+				<ul>
+					{% for file in rawFiles %}
+						<li>{{ file.name }}</li>
+						{% if updates contains file.name %}
+							<ul>
+								{% for update in updates.get(file.name) %}
+									<li style="color: {{ update.success ? 'green' : 'red' }};">{{ update.text }}</li>
+								{% endfor %}
+							</ul>
+						{% endif %}
+					{% endfor %}
+				</ul>
+		</div>
+
+		<div id="footer">
+			{% block footer %}
+				Default footer content
+			{% endblock %}
+		</div>
+	</body>
+</html>

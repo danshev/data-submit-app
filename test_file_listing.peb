@@ -1,10 +1,35 @@
+<!-- BEGIN: standard Trident submit app templating !-->
 <!DOCTYPE html>
+
 <html>
-<head>
-<title>Data Submission</title>
-<script src="jquery-3.2.1.min.js"></script>
-</head>
-<body>
+    <head>
+        <title>The slash at the end of the href is important!</title>
+        <base href="file://{{ root_directory }}" />
+        <script src="jquery-3.2.1.min.js" type="text/javascript"></script>
+
+    <style>
+		table {
+		    font-family: arial, sans-serif;
+		    border-collapse: collapse;
+		    width: 100%;
+		}
+
+		td, th {
+		    border: 1px solid #dddddd;
+		    text-align: left;
+		    padding: 8px;
+		}
+
+		tr:nth-child(even) {
+		    background-color: #dddddd;
+		}
+	</style>
+
+
+    </head>
+    <body>
+
+	<div id="jQuery-status" style="color:red; text-align:center;">JQUERY NOT LOADED! SUBMISSION ERRORS WILL OCCUR</div>
 
 	<div id="data">
 		<h3>Required Metadata</h3>
@@ -12,61 +37,111 @@
 			<label for="serial_number">Serial Number</label>
 			<input type="text" name="serial_number" id="serial_number" placeholder="ex: 8142"><br>
 		</div>
-
-	  	<h3>Files to be Submitted</h3>
-	    	{% if rawFiles is not empty %}
-				<h4>Raw</h4>
+    	{% if rawFiles is not empty %}
+    		<h3>Raw Files</h3>
+    		<table id="raw-files">
+				<tr>
+					<th>Filepath</th>
+					<th>Filename</th>
+				</tr>
 				{% for file in rawFiles %}
-					<input type="text" name="raw-{{ loop.index }}" size=75 value="{{ file.path }}{{ file.name }}" readonly><br>
+			  	<tr>
+			    	<td class="file-path">{{ file.path }}</td>
+			    	<td class="file-name">{{ file.name }}</td>
+			  	</tr>
 				{% endfor %}
-			{% endif %}
-			{% if processedFiles is not empty %}
-				<h4>Processed</h4>
-				{% for file in processedFiles %}
-					<input type="text" name="processed-{{ loop.index }}" size=75 value="{{ file.path }}{{ file.name }}" readonly><br>
+			</table>
+		{% endif %}
+		{% if processedFiles is not empty %}
+			<h3>Processed Files</h3>
+    		<table id="processed-files">
+				<tr>
+					<th>Filepath</th>
+					<th>Filename</th>
+				</tr>
+				{% for file in rawFiles %}
+			  	<tr>
+			    	<td class="file-path">{{ file.path }}</td>
+			    	<td class="file-name">{{ file.name }}</td>
+			  	</tr>
 				{% endfor %}
-			{% endif %}
-
+			</table>
+		{% endif %}
 	  	<br>
-	  	<input type="submit" value="Submit">
+	  	<input id="btn-form-submit" type="submit" value="Submit">
 	</div>
+
+	<div id="status" style="color:green;"></div>
+
+	<script type='text/javascript'>
+		(function() {
+		   // Clear the warning about jQuery, since jQuery has been successfully loaded
+			$("#jQuery-status").empty();
+
+			function populate_from_table(payload, tableID, isRaw) {
+				$('#'+ tableID +' > tbody > tr').not(":first").each(function() {
+
+					var filepath = null,
+						filename = null;
+
+					$.each($(this).find(".file-path"), function() {
+						filepath = $(this).html();
+					});
+
+					$.each($(this).find(".file-name"), function() {
+						filename = $(this).html();
+					});
+
+					if(filepath && filename) {
+						payload.files.push({ filepath: filepath, filename: filename, is_raw: isRaw });
+					}
+				});
+			};
+
+			function prep_submission_data() {
+
+				// Build the payload
+				var payload = {};
+				payload.nifi_endpoint = "{{ server_port_url }}";
+				payload.action_path_id = "{{ action_path_id }}";
+			    payload.metadata = {};
+				payload.files = [];
+			    
+			    // Populate the METADATA portion of the payload
+			    $("#metadata input").each(function(index){
+			    	payload.metadata[$(this).attr('id')] = $(this).val();
+			    });
+
+				// Populate the RAW data files portion of the payload
+				populate_from_table(payload, 'raw-files', true);
+
+				// Populate the PROCESSED data files portion of the payload
+				populate_from_table(payload, 'processed-files', false);
+
+				return payload;
+			};
+
+			$("#btn-form-submit").click(function(e) {
+				$.ajax({
+				    type: "POST",
+				    url: "http://localhost:8998/formSubmit",
+				    data: prep_submission_data(),
+				    dataType: "json",
+				    crossDomain: true,
+				    // jsonp: false,
+        			// jsonpCallback: 'jsonpCallback',
+				    success: function(res) {
+				    	// $("#status").text("success!");
+				    },
+				    error: function (xhr, ajaxOptions, thrownError) {
+				    	// $("#status").text(xhr.status);
+				    	//$("#status").text(thrownError);
+				    }
+				})
+			});
+
+		})();
+	</script>
 
 </body>
 </html>
-
-<script type='text/javascript'>
-	$(document).ready(function() {
-
-		function prep_JSON_data() {
-			
-			// Build the payload
-			var payload = {};
-			payload.nifi_target = {{ server_port_url }};
-			payload.action_path_id = {{ action_path_id }};
-		    payload.metadata = {};
-			payload.files = [];
-		    
-		    // Populate the METADATA portion of the payload
-		    $("#metadata input").each(function(index){
-		    	payload.metadata[$(this).attr('id')] = $(this).val();
-		    });
-
-			// Populate the RAW data files portion of the payload
-			$("input[type='text'][name*='raw-']").each(function(index) {
-				payload.files.push({ path_filename: $(this).val(), is_raw: true });
-			});
-
-			// Populate the PROCESSED data files portion of the payload
-			$("input[type='text'][name*='processed-']").each(function(index) {
-				payload.files.push({ path_filename: $(this).val(), is_raw: false });
-			});
-
-			return JSON.stringify(payload);
-		};
-
-		// console.log(prep_JSON_data());
-
-		// jQuery.post("/formSubmit", payload, function(res){ console.log(res); }, "json");
-	});
-</script>
-

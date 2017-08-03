@@ -109,6 +109,10 @@ public class MainGuiController implements Initializable {
 		return this.eventUUID;
   	}
 
+  	public boolean isStandalone() {
+		return this.standaloneMode;
+  	}
+
 	protected void checkNiFi() {
 		try {
 			URL url = new URL("http://" + nifiAddr + ":" + Integer.toString(nifiPort) + nifiRoute);
@@ -301,6 +305,8 @@ public class MainGuiController implements Initializable {
 
 		String followOnTemplate = getSelectedEvent().followOnHandlers.get(userInputData.responseID).toString();
 		context.put("responseData", userInputData.responseData);
+
+		context.put("root_directory", new File(OsUtilities.getFilename("")).toPath().toAbsolutePath());
 		
 		try {
 			templateService.getTemplate(followOnTemplate).evaluate(writer, context);
@@ -323,6 +329,7 @@ public class MainGuiController implements Initializable {
 		context.put("rawFiles", rawFiles);
 		context.put("processedFiles", processedFiles);
 		context.put("updates", statusUpdates);
+		context.put("root_directory", new File(OsUtilities.getFilename("")).toPath().toAbsolutePath());
 
 		try {
 			templateService.getTemplate("status.peb").evaluate(writer, context);

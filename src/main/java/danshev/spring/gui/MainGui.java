@@ -196,4 +196,8 @@ public class MainGui implements InitializingBean {
 		});
 	}
 
+	public boolean isStandalone() {
+		return controller.isStandalone();
+	}
+
 }

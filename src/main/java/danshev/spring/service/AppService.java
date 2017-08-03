@@ -20,4 +20,6 @@ public interface AppService {
 
 	void statusUpdate(StatusUpdate update);
 
+	boolean isStandalone();
+
 }

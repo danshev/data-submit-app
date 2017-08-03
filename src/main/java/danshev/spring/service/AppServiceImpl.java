@@ -51,4 +51,9 @@ public class AppServiceImpl implements AppService {
 		mainGui.statusUpdate(update);
 	}
 
+	@Override
+	public boolean isStandalone() {
+		return mainGui.isStandalone();
+	}
+
 }

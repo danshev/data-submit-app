@@ -258,6 +258,7 @@ public class MainGuiController implements Initializable {
 		Writer writer = new StringWriter();
 		Map<String, Object> context = new HashMap<>();
 		
+		context.put("root_directory", new File(OsUtilities.getFilename("")).toPath().toAbsolutePath());
 		context.put("rawFiles", rawFiles);
 		context.put("processedFiles", processedFiles);
 		context.put("server_port_url", nifiAddr + ":" + nifiPort + nifiRoute);

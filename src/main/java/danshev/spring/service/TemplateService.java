@@ -24,14 +24,6 @@ public class TemplateService implements InitializingBean {
  	}
 
 	public PebbleTemplate getTemplate(String template) throws PebbleException {
-		File fout = new File("test.out");
-		try {
-			fout.createNewFile();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
 		return engine.getTemplate(OsUtilities.getFilename(template));
 	}
 	

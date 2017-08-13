@@ -344,4 +344,8 @@ public class MainGuiController implements Initializable {
 		WebEngine engine = webView.getEngine();
 		engine.loadContent(content);
 	}
+
+	public String getNifiBaseAddr() {
+		return "http://" + nifiAddr + ":" + nifiPort;
+	}
 }

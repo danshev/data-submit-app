@@ -56,4 +56,9 @@ public class AppServiceImpl implements AppService {
 		return mainGui.isStandalone();
 	}
 
+	@Override
+	public String getNifiBaseAddr() {
+		return mainGui.getController().getNifiBaseAddr();
+	}
+
 }

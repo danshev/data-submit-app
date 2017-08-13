@@ -83,6 +83,7 @@ public class MainGui implements InitializingBean {
 		window.setTitle("Data Submit App");
 		window.setScene(scene);
 		window.setOnCloseRequest(new EventHandler<WindowEvent>() {
+		    @Override
 			public void handle(WindowEvent we) {
 				System.exit(0);
 			}

@@ -22,4 +22,6 @@ public interface AppService {
 
 	boolean isStandalone();
 
+	String getNifiBaseAddr();
+
 }

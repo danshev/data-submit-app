@@ -88,20 +88,8 @@ public class DataSubmitController {
 
 			if (!formData.files.isEmpty()) {
 
-				File outFile = OsUtilities.getFile(eventUUIDstring + ".nifi");
-				FileOutputStream fos;
-
-				if (appService.isStandalone()) {
-					try {
-						fos = new FileOutputStream(outFile, true);
-					} catch (FileNotFoundException e) {
-						e.printStackTrace();
-					}
-					
-					catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
+				FileWriter outFile = new FileWriter(eventUUIDstring + ".nifi");
+				String newLine = System.getProperty("line.separator");
 
 				for (FormSubmitFileData fileData : formData.files) {
 					JsonObject json = new JsonObject();
@@ -118,7 +106,7 @@ public class DataSubmitController {
 						sendPost("http://" + formData.nifiEndpoint, json);
 
 						if (appService.standalone()) {
-							fos.write(json);
+							outFile.write(json + newLine);
 						}
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
@@ -127,7 +115,7 @@ public class DataSubmitController {
 				}
 
 				if (appService.standalone()) {
-					fos.close();
+					outFile.close();
 				}
 			}
 

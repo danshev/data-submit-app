@@ -179,7 +179,7 @@ public class DataSubmitController {
 				FileOutputStream fos;
 				try {
 					fos = new FileOutputStream(outFile, true);
-					fos.write(formData.toString().getBytes());
+					fos.write(gson.toJson(formData).getBytes());
 					fos.close();
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();

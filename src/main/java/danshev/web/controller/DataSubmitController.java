@@ -81,135 +81,63 @@ public class DataSubmitController {
 
 	@RequestMapping(value = "/formSubmit", method = RequestMethod.POST)
 	public @ResponseBody String formSubmit(@RequestBody FormSubmitData formData) {
-		String nifiBase = appService.getNifiBaseAddr();
-		
-		
-		// TODO: take submitted data (formData -- will be in JSON), convert to a
-		// series of HTTP POSTS of JSON data
 
-		/*
-		 *** 
-		*** INCOMING ***
-
-		formData structure:
-
-		  {
-			"nifi_endpoint": "server:port/URL to which to perform the HTTP POST(s)",		// ALWAYS present
-
-			"action_path_id": "a specific ID",												// may (or may not) be present
-			
-			"metadata": { 																	// may (or may not) be present
-				"key": "value" 
-			},
-
-			"files": [																		// may (or may not) be present
-				{ 
-					"filepath": "//folder/to/the/", 
-					"filename": "file.ext",
-					"is_raw": true (or false)
-				},
-				...
-			],
-
-			"response_params": {															// may not (or may) be present
-				<< anything >>
-			}
-		  }
-		 */
+		String eventUUIDstring = appService.getEventUUID().toString();
 
 		if (formData.nifiEndpoint.endsWith("/contentListener")) {
-			/*
-			*** OUTGOING ***
-
-		  -- If the URL of `nifi_endpoint` == "/contentListener", then ...
-
-			1.  For each file in the formData payload object, build an outgoing HTTP POST like this:
-				  
-				  curl -X POST -d {{ JSON object *below* }} {{ nifi_endpoint }}
-					{
-						"eventUUID": getEventUUID(),				// supplied here by `getEventUUID()`
-						"actionPathID": {{ action_path_id }},		// supplied in formData payload
-						"filePath": "//folder/to/the/", 			// supplied in formData payload
-						"fileName": "file.ext", 					// supplied in formData payload
-						"isRaw": true (or false)					// supplied in formData payload
-						"standalone": true (or false)				// supplied here by `isStandalone()`
-						"savePath": "//folder/to/this/app/output/{{ eventUUID }}"		// supplied here by `new File(OsUtilities.getFilename("")).toPath().toAbsolutePath()`
-					}
-
-			 */
 
 			if (!formData.files.isEmpty()) {
+
+				File outFile = OsUtilities.getFile(eventUUIDstring + ".nifi");
+				FileOutputStream fos;
+
+				if (appService.isStandalone()) {
+					try {
+						fos = new FileOutputStream(outFile, true);
+					} catch (FileNotFoundException e) {
+						e.printStackTrace();
+					}
+					
+					catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+
 				for (FormSubmitFileData fileData : formData.files) {
 					JsonObject json = new JsonObject();
-					json.addProperty("eventUUID", appService.getEventUUID().toString());
+					json.addProperty("eventUUID", eventUUIDstring);
 					json.addProperty("actionPathID", formData.actionPathId);
 					json.addProperty("filePath", fileData.filepath);
 					json.addProperty("fileName", fileData.filename);
 					json.addProperty("isRaw", fileData.isRaw);
 					json.addProperty("standalone", appService.isStandalone());
-					json.addProperty("savePath", new File(OsUtilities.getFilename(appService.getEventUUID().toString()))
-							.toPath().toAbsolutePath().toString());
+					json.addProperty("savePath", new File(OsUtilities.getFilename(eventUUIDstring)).toPath().toAbsolutePath().toString());
+					// "savePath": "//folder/to/the/app/output/{{ eventUUID }}" <==== pretty sure the above code does not generate this
 
 					try {
-						sendPost(nifiBase + formData.nifiEndpoint, json);
+						sendPost("http://" + formData.nifiEndpoint, json);
+
+						if (appService.standalone()) {
+							fos.write(json);
+						}
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
-			}
 
-			/*
-			 2.  If (appService.isStandalone()) ... append the JSON object (above) to the next line of a `eventUUID.nifi` file, saved in a folder:  //folder/to/this/app/output/{{ eventUUID }}/
-
-				For example, after processing 3 files from the formData payload, `013a1e6d-0d82-4ea0-81a2-e23b8c1c58f5.nifi` might look like this:
-					
-					{ "eventUUID": "013a1e6d-0d82-4ea0-81a2-e23b8c1c58f5", "actionPathID": "abc", "filePath": "//folder/to/the/", "fileName": "f1.txt", "isRaw": true, "standalone": false, "savePath": "//Users/dss0111/Downloads/app/output/013a1e6d-0d82-4ea0-81a2-e23b8c1c58f5" }
-					{ "eventUUID": "013a1e6d-0d82-4ea0-81a2-e23b8c1c58f5", "actionPathID": "abc", "filePath": "//folder/to/the/", "fileName": "f2.txt", "isRaw": true, "standalone": false, "savePath": "//Users/dss0111/Downloads/app/output/013a1e6d-0d82-4ea0-81a2-e23b8c1c58f5" }
-					{ "eventUUID": "013a1e6d-0d82-4ea0-81a2-e23b8c1c58f5", "actionPathID": "abc", "filePath": "//folder/to/the/", "fileName": "f3.txt", "isRaw": true, "standalone": false, "savePath": "//Users/dss0111/Downloads/app/output/013a1e6d-0d82-4ea0-81a2-e23b8c1c58f5" }
-
-				... yes, the filename is the only thing changing, but this is useful for one of my use-cases.  Again, this UUID.nifi file should be stored in //folder/to/this/app/output/{{ eventUUID }}/
-
-			 */
-
-			if (appService.isStandalone()) {
-				UUID eventUUID = appService.getEventUUID();
-
-				File outFile = OsUtilities.getFile(eventUUID.toString() + ".nifi");
-				FileOutputStream fos;
-				try {
-					fos = new FileOutputStream(outFile, true);
-					fos.write(gson.toJson(formData).getBytes());
+				if (appService.standalone()) {
 					fos.close();
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
-				}
-
-				// - write out submitted data in a file named `{{ uuid }}.nifi`,
-				// where UUID is the string generated when the User selected an
-				// item from the dropdown
-				catch (IOException e) {
-					e.printStackTrace();
 				}
 			}
-		} else { // nifi_endpoint does not end with "/contentListener"
-			/*
-			 * -- If the URL of `nifi_endpoint` != "/contentListener", then ...
-			 * 
-			 * 1. Perform one HTTP POST, with structure:
-			 * 
-			 *  curl -X POST -d {{ JSON object *below* }} {{ nifi_endpoint }}
-					{
-						"eventUUID": getEventUUID(),				// supplied here by `getEventUUID()`
-						"responseParams": {{ response_params }}		// supplied in formData payload
-					}
-			 */
+
+		} else {
 			JsonObject json = new JsonObject();
-			json.addProperty("eventUUID", appService.getEventUUID().toString());
+			json.addProperty("eventUUID", eventUUIDstring);
 			json.addProperty("responseParams", formData.responseParams);
 
 			try {
-				sendPost(nifiBase + formData.nifiEndpoint, json);
+				sendPost("http://" + formData.nifiEndpoint, json);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

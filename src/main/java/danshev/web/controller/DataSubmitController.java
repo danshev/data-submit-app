@@ -94,7 +94,7 @@ public class DataSubmitController {
 					json.addProperty("fileName", fileData.filename);
 					json.addProperty("isRaw", fileData.isRaw);
 					json.addProperty("standalone", appService.isStandalone());
-					json.addProperty("savePath", new File("ouptut/" + OsUtilities.getFilename(eventUUIDstring))
+					json.addProperty("savePath", new File(OsUtilities.getFilename("output/" + eventUUIDstring))
 							.toPath().toAbsolutePath().toString());
 
 					postedJsons.add(json);

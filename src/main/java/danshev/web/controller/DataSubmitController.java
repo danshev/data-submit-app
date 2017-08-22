@@ -1,23 +1,19 @@
 package danshev.web.controller;
 
-import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Controller;
@@ -138,6 +134,8 @@ public class DataSubmitController {
 
 			 */
 
+			List<JsonObject> postedJsons = new ArrayList<>();
+			
 			if (!formData.files.isEmpty()) {
 				for (FormSubmitFileData fileData : formData.files) {
 					JsonObject json = new JsonObject();
@@ -147,9 +145,11 @@ public class DataSubmitController {
 					json.addProperty("fileName", fileData.filename);
 					json.addProperty("isRaw", fileData.isRaw);
 					json.addProperty("standalone", appService.isStandalone());
-					json.addProperty("savePath", new File(OsUtilities.getFilename(appService.getEventUUID().toString()))
+					json.addProperty("savePath", new File("ouptut/" + OsUtilities.getFilename(appService.getEventUUID().toString()))
 							.toPath().toAbsolutePath().toString());
 
+					postedJsons.add(json);
+					
 					try {
 						sendPost(nifiBase + formData.nifiEndpoint, json);
 					} catch (Exception e) {
@@ -177,9 +177,16 @@ public class DataSubmitController {
 
 				File outFile = OsUtilities.getFile(eventUUID.toString() + ".nifi");
 				FileOutputStream fos;
+				DataOutputStream dos;
 				try {
 					fos = new FileOutputStream(outFile, true);
-					fos.write(gson.toJson(formData).getBytes());
+					dos = new DataOutputStream(fos);
+					
+					for(JsonObject json : postedJsons) {
+						dos.writeChars(json.toString());
+						dos.writeChars(System.lineSeparator());
+					}
+					dos.close();
 					fos.close();
 				} catch (FileNotFoundException e) {
 					e.printStackTrace();

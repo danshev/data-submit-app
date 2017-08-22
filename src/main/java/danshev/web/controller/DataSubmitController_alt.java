@@ -1,19 +1,23 @@
 package danshev.web.controller;
 
-import java.io.DataOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Controller;
@@ -82,9 +86,10 @@ public class DataSubmitController {
 
 		if (formData.nifiEndpoint.endsWith("/contentListener")) {
 
-			List<JsonObject> postedJsons = new ArrayList<>();
-			
 			if (!formData.files.isEmpty()) {
+
+				FileWriter outFile = new FileWriter(eventUUIDstring + ".nifi");
+				String newLine = System.getProperty("line.separator");
 
 				for (FormSubmitFileData fileData : formData.files) {
 					JsonObject json = new JsonObject();
@@ -94,49 +99,23 @@ public class DataSubmitController {
 					json.addProperty("fileName", fileData.filename);
 					json.addProperty("isRaw", fileData.isRaw);
 					json.addProperty("standalone", appService.isStandalone());
-					json.addProperty("savePath", new File("ouptut/" + OsUtilities.getFilename(eventUUIDstring))
-							.toPath().toAbsolutePath().toString());
+					json.addProperty("savePath", new File(OsUtilities.getFilename(eventUUIDstring)).toPath().toAbsolutePath().toString());
+					// "savePath": "//folder/to/the/app/output/{{ eventUUID }}" <==== pretty sure the above code does not generate this
 
-					postedJsons.add(json);
-					
 					try {
 						sendPost("http://" + formData.nifiEndpoint, json);
+
+						if (appService.standalone()) {
+							outFile.write(json + newLine);
+						}
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
 
-
-				if (appService.isStandalone()) {
-					UUID eventUUID = appService.getEventUUID();
-	
-					File outFile = OsUtilities.getFile(eventUUID.toString() + ".nifi");
-					FileOutputStream fos = null;
-					DataOutputStream dos = null;
-					try {
-						fos = new FileOutputStream(outFile, true);
-						dos = new DataOutputStream(fos);
-						
-						for(JsonObject json : postedJsons) {
-							dos.writeChars(json.toString());
-							dos.writeChars(System.lineSeparator());
-						}
-						
-					} catch(IOException e) {
-						e.printStackTrace();
-					} finally {
-						try {
-							if(dos != null) {
-								dos.close();
-							}
-							if(fos != null) {
-								fos.close();
-							}
-						} catch(IOException e) {
-							e.printStackTrace();
-						}
-					}
+				if (appService.standalone()) {
+					outFile.close();
 				}
 			}
 

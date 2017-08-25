@@ -294,6 +294,13 @@ public class MainGuiController implements Initializable {
 				});
 		    }
 		});
+		
+		writeOutputData(content);
+		
+		engine.load("http://localhost:8998/getStatic/outputdata");
+	}
+
+	private void writeOutputData(String content) {
 		try {
 			FileOutputStream fos = new FileOutputStream(new File(OsUtilities.getFilename("outputdata")));
 			fos.write(content.getBytes());
@@ -302,8 +309,6 @@ public class MainGuiController implements Initializable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		engine.load("http://localhost:8998/getStatic/outputdata");
 	}
 
 	public void renderUserInput(UserInputData userInputData) {
@@ -326,7 +331,10 @@ public class MainGuiController implements Initializable {
 		}
 		String content = writer.toString();
 		WebEngine engine = webView.getEngine();
-		engine.loadContent(content);
+		
+		writeOutputData(content);
+		
+		engine.load("http://localhost:8998/getStatic/outputdata");
 	}
 
 	public void renderStatusUpdate(List<FileData> rawFiles, List<FileData> processedFiles,
@@ -349,7 +357,10 @@ public class MainGuiController implements Initializable {
 		}
 		String content = writer.toString();
 		WebEngine engine = webView.getEngine();
-		engine.loadContent(content);
+		
+		writeOutputData(content);
+		
+		engine.load("http://localhost:8998/getStatic/outputdata");
 	}
 
 	public String getNifiBaseAddr() {

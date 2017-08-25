@@ -1,13 +1,8 @@
 package danshev.web.controller;
 
-import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -78,6 +73,13 @@ public class DataSubmitController {
 
 		return "";
 	}
+	@RequestMapping(value = "/formSubmit2", method = RequestMethod.POST)
+	public @ResponseBody String formSubmit2(@RequestBody String formData) {
+		System.out.println("RECEIVED: '" + formData+ "'");
+		return formData;
+	}
+
+	
 
 	@RequestMapping(value = "/formSubmit", method = RequestMethod.POST)
 	public @ResponseBody String formSubmit(@RequestBody FormSubmitData formData) {
@@ -98,9 +100,9 @@ public class DataSubmitController {
 					json.addProperty("fileName", fileData.filename);
 					json.addProperty("isRaw", fileData.isRaw);
 					json.addProperty("standalone", appService.isStandalone());
-					json.addProperty("savePath", new File(OsUtilities.getFilename("output/" + eventUUIDstring)).toPath()
-							.toAbsolutePath().toString());
-
+					json.addProperty("savePath", OsUtilities.simplifyPath(new File(OsUtilities.getFilename("output/" + eventUUIDstring)).toPath()
+							.toAbsolutePath().toString()));
+					
 					postedJsons.add(json);
 
 					try {

@@ -94,6 +94,7 @@ public class DataSubmitController {
 
 				for (FormSubmitFileData fileData : formData.files) {
 					JsonObject json = new JsonObject();
+					json.addProperty("metadata", formData.metadata);
 					json.addProperty("eventUUID", eventUUIDstring);
 					json.addProperty("actionPathID", formData.actionPathId);
 					json.addProperty("filePath", fileData.filepath);

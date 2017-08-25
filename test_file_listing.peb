@@ -102,11 +102,12 @@
 			function prep_submission_data() {
 
 				// Build the payload
-				var payload = {};
-				payload.nifi_endpoint = "{{ server_port_url }}";
-				payload.action_path_id = "{{ action_path_id }}";
-			    payload.metadata = {};
-				payload.files = [];
+				var payload = {
+				nifiEndpoint: "{{ server_port_url }}",
+				actionPathId: "{{ action_path_id }}",
+			    metadata: {},
+				files: []
+				};
 			    
 			    // Populate the METADATA portion of the payload
 			    $("#metadata input").each(function(index){
@@ -126,8 +127,9 @@
 				$.ajax({
 				    type: "POST",
 				    url: "http://localhost:8998/formSubmit",
-				    data: prep_submission_data(),
+				    data: JSON.stringify(prep_submission_data()),
 				    dataType: "json",
+				    contentType: "application/json", 
 				    crossDomain: true,
 				    // jsonp: false,
         			// jsonpCallback: 'jsonpCallback',

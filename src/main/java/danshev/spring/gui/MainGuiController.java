@@ -298,7 +298,7 @@ public class MainGuiController implements Initializable {
 		    }
 		});
 		try {
-			FileOutputStream fos = new FileOutputStream(new File("outputdata"));
+			FileOutputStream fos = new FileOutputStream(new File(OsUtilities.getFilename("outputdata")));
 			fos.write(content.getBytes());
 			fos.close();
 		} catch (IOException e) {

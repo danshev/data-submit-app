@@ -1,9 +1,13 @@
 package danshev.web.controller;
 
+import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -83,7 +87,7 @@ public class DataSubmitController {
 		if (formData.nifiEndpoint.endsWith("/contentListener")) {
 
 			List<JsonObject> postedJsons = new ArrayList<>();
-			
+
 			if (!formData.files.isEmpty()) {
 
 				for (FormSubmitFileData fileData : formData.files) {
@@ -94,11 +98,11 @@ public class DataSubmitController {
 					json.addProperty("fileName", fileData.filename);
 					json.addProperty("isRaw", fileData.isRaw);
 					json.addProperty("standalone", appService.isStandalone());
-					json.addProperty("savePath", new File(OsUtilities.getFilename("output/" + eventUUIDstring))
-							.toPath().toAbsolutePath().toString());
+					json.addProperty("savePath", new File(OsUtilities.getFilename("output/" + eventUUIDstring)).toPath()
+							.toAbsolutePath().toString());
 
 					postedJsons.add(json);
-					
+
 					try {
 						sendPost("http://" + formData.nifiEndpoint, json);
 					} catch (Exception e) {
@@ -107,33 +111,32 @@ public class DataSubmitController {
 					}
 				}
 
-
 				if (appService.isStandalone()) {
 					UUID eventUUID = appService.getEventUUID();
-	
+
 					File outFile = OsUtilities.getFile(eventUUID.toString() + ".nifi");
 					FileOutputStream fos = null;
 					DataOutputStream dos = null;
 					try {
 						fos = new FileOutputStream(outFile, true);
 						dos = new DataOutputStream(fos);
-						
-						for(JsonObject json : postedJsons) {
+
+						for (JsonObject json : postedJsons) {
 							dos.writeChars(json.toString());
 							dos.writeChars(System.lineSeparator());
 						}
-						
-					} catch(IOException e) {
+
+					} catch (IOException e) {
 						e.printStackTrace();
 					} finally {
 						try {
-							if(dos != null) {
+							if (dos != null) {
 								dos.close();
 							}
-							if(fos != null) {
+							if (fos != null) {
 								fos.close();
 							}
-						} catch(IOException e) {
+						} catch (IOException e) {
 							e.printStackTrace();
 						}
 					}
@@ -155,7 +158,7 @@ public class DataSubmitController {
 
 		return "ok";
 	}
-	
+
 	private void sendPost(String url, JsonObject data) throws Exception {
 
 		HttpClient client = HttpClientBuilder.create().build();
@@ -164,15 +167,13 @@ public class DataSubmitController {
 		// add header
 		post.setHeader("User-Agent", "data-submit-app");
 
-
 		post.setEntity(new StringEntity(gson.toJson(data)));
 		post.setHeader("Content-type", "application/json");
 		HttpResponse response = client.execute(post);
-		
+
 		System.out.println("Sending POST to URL : " + url);
 		System.out.println("Post parameters : " + post.getEntity());
-		System.out.println("Response Code : " +
-                                    response.getStatusLine().getStatusCode());
+		System.out.println("Response Code : " + response.getStatusLine().getStatusCode());
 
 	}
 
@@ -189,6 +190,30 @@ public class DataSubmitController {
 		appService.statusUpdate(update);
 
 		return "statusUpdate";
+	}
+
+	@RequestMapping(value = "/template/{template}", method = RequestMethod.GET)
+	public @ResponseBody String templateoutput(@PathVariable String template) {
+		try {
+			return readFileAsString(template);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return "cannot read file";
+	}
+
+	private String readFileAsString(String filePath) throws IOException {
+		StringBuffer fileData = new StringBuffer();
+		BufferedReader reader = new BufferedReader(new FileReader(filePath));
+		char[] buf = new char[1024];
+		int numRead = 0;
+		while ((numRead = reader.read(buf)) != -1) {
+			String readData = String.valueOf(buf, 0, numRead);
+			fileData.append(readData);
+		}
+		reader.close();
+		return fileData.toString();
 	}
 
 	@Autowired

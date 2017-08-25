@@ -4,7 +4,8 @@
 <html>
     <head>
         <title>The slash at the end of the href is important!</title>
-        <base href="file://{{ root_directory }}" />
+        <base href="http://localhost:8998/template/" />
+        <script type="text/javascript">document.domain=document.domain</script>
         <script src="jquery-3.2.1.min.js" type="text/javascript"></script>
 
     <style>

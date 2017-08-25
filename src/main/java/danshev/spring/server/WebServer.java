@@ -7,6 +7,9 @@ import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.eclipse.jetty.rewrite.handler.HeaderPatternRule;
+import org.eclipse.jetty.rewrite.handler.RewriteHandler;
+import org.eclipse.jetty.rewrite.handler.Rule;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.NCSARequestLog;
 import org.eclipse.jetty.server.RequestLog;
@@ -99,14 +102,28 @@ public class WebServer {
 
         List<Handler> _handlers = new ArrayList<>();
 
+        RewriteHandler rewrite = new RewriteHandler();
+        HeaderPatternRule rule = new HeaderPatternRule();
+        rule.setPattern("/template/output.data");
+        rule.setName("Access-Control-Allow-Origin");
+        rule.setValue("*");
+        rewrite.addRule(rule);
+        HeaderPatternRule rule2 = new HeaderPatternRule();
+        rule2.setPattern("/template/output.data");
+        rule2.setName("Access-Control-Allow-Methods");
+        rule2.setValue("GET, POST, DELETE, PUT");
+        rewrite.addRule(rule2);
+        
+        _handlers.add(rewrite);
         _handlers.add(_ctx);
 
         HandlerList _contexts = new HandlerList();
-        _contexts.setHandlers(_handlers.toArray(new Handler[0]));
+        _contexts.setHandlers(_handlers.toArray(new Handler[2]));
 
         RequestLogHandler _log = new RequestLogHandler();
         _log.setRequestLog(createRequestLog());
 
+        
         HandlerCollection _result = new HandlerCollection();
         _result.setHandlers(new Handler[] { _contexts, _log });
 

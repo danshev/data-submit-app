@@ -306,7 +306,7 @@ public class MainGuiController implements Initializable {
 			e.printStackTrace();
 		}
 		
-		engine.load("http://localhost:8998/template/outputdata");
+		engine.load("http://localhost:8998/getStatic/outputdata");
 	}
 
 	public void renderUserInput(UserInputData userInputData) {

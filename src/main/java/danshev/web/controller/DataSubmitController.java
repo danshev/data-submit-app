@@ -92,9 +92,13 @@ public class DataSubmitController {
 
 			if (!formData.files.isEmpty()) {
 
+				// TODO:
+				//  1. Read key/value pairs from metadata.properties
+				//  2. Add the key/value pairs to the formData.metadata object
+
 				for (FormSubmitFileData fileData : formData.files) {
 					JsonObject json = new JsonObject();
-					json.addProperty("metadata", gson.toJson(formData.metadata));
+					json.addProperty("metadata", gson.toJson(formData.metadata));	// 3. Send the augmented metadata
 					json.addProperty("eventUUID", eventUUIDstring);
 					json.addProperty("actionPathID", formData.actionPathId);
 					json.addProperty("filePath", fileData.filepath);

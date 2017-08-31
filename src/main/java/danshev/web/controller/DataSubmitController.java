@@ -90,18 +90,42 @@ public class DataSubmitController {
 
 			List<JsonObject> postedJsons = new ArrayList<>();
 
+			String rawBaseFilePath;
+			String processedBaseFilePath;
+
 			if (!formData.files.isEmpty()) {
 
-				// TODO:
-				//  1. Read key/value pairs from metadata.properties
+				// TODO: Add additional metadata
+				//  1. Read key/value pairs from the metadata.properties file
 				//  2. Add the key/value pairs to the formData.metadata object
 
 				for (FormSubmitFileData fileData : formData.files) {
+
+					// TODO: Determine the RELATIVE filePath for each file
+					//	Due to some actions on the NiFi side, I need to include the relative file path in the JSON object that we POST to NiFi
+					//	Conveniently, the list of RAW and PROCESSED files arrive to this controller with the first always having the BASE (AKA the shortest) filePath
+
+					String relativeFilePath = String();
+					if (fileData.isRaw) {
+						if (rawBaseFilePath === null) {
+							rawBaseFilePath = fileData.filepath;
+						} else {
+							relativeFilePath = "SOME CODE";	// compare `rawBaseFilePath` vs. fileData.filepath;
+						}
+					} else {
+						if (processedBaseFilePath === null) {
+							processedBaseFilePath = fileData.filepath;
+						} else {
+							relativeFilePath = "SOME CODE";	// compare `rawBaseFilePath` vs. fileData.filepath;
+						}
+					}
+
 					JsonObject json = new JsonObject();
 					json.addProperty("metadata", gson.toJson(formData.metadata));	// 3. Send the augmented metadata
 					json.addProperty("eventUUID", eventUUIDstring);
 					json.addProperty("actionPathID", formData.actionPathId);
 					json.addProperty("filePath", fileData.filepath);
+					json.addProperty("relativeFilePath", relativeFilePath);
 					json.addProperty("fileName", fileData.filename);
 					json.addProperty("isRaw", fileData.isRaw);
 					json.addProperty("standalone", appService.isStandalone());

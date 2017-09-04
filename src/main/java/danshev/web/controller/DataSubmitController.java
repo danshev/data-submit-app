@@ -2,10 +2,16 @@ package danshev.web.controller;
 
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Paths;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.UUID;
 
 import org.apache.http.HttpResponse;
@@ -78,8 +84,24 @@ public class DataSubmitController {
 		System.out.println("RECEIVED: '" + formData+ "'");
 		return formData;
 	}
-
 	
+	private Properties getMetadata() {
+		Properties props = new Properties();
+		InputStream is = null;
+
+		// First try loading from the current directory
+		try {
+			File f = OsUtilities.getFile("metadata.properties");
+			is = new FileInputStream(f);
+			props.load(is);
+			is.close();
+		} catch (Exception e) {
+			is = null;
+		}
+		
+		return props;
+	}
+
 
 	@RequestMapping(value = "/formSubmit", method = RequestMethod.POST)
 	public @ResponseBody String formSubmit(@RequestBody FormSubmitData formData) {
@@ -90,8 +112,8 @@ public class DataSubmitController {
 
 			List<JsonObject> postedJsons = new ArrayList<>();
 
-			String rawBaseFilePath;
-			String processedBaseFilePath;
+			String rawBaseFilePath = null;
+			String processedBaseFilePath = null;
 
 			if (!formData.files.isEmpty()) {
 
@@ -101,25 +123,28 @@ public class DataSubmitController {
 
 				for (FormSubmitFileData fileData : formData.files) {
 
-					// TODO: Determine the RELATIVE filePath for each file
-					//	Due to some actions on the NiFi side, I need to include the relative file path in the JSON object that we POST to NiFi
-					//	Conveniently, the list of RAW and PROCESSED files arrive to this controller with the first always having the BASE (AKA the shortest) filePath
-
-					String relativeFilePath = String();
+					
+					String relativeFilePath = "";
 					if (fileData.isRaw) {
-						if (rawBaseFilePath === null) {
+						if (rawBaseFilePath == null) {
 							rawBaseFilePath = fileData.filepath;
-						} else {
-							relativeFilePath = "SOME CODE";	// compare `rawBaseFilePath` vs. fileData.filepath;
 						}
+						
+						relativeFilePath = fileData.filepath.replace(rawBaseFilePath, "");
 					} else {
-						if (processedBaseFilePath === null) {
+						if (processedBaseFilePath == null) {
 							processedBaseFilePath = fileData.filepath;
-						} else {
-							relativeFilePath = "SOME CODE";	// compare `rawBaseFilePath` vs. fileData.filepath;
 						}
+						
+						relativeFilePath = fileData.filepath.replace(processedBaseFilePath, "");
 					}
-
+										
+					Properties metadata = getMetadata();
+					for(Object key : metadata.keySet()) {
+						String metadatakey = (String) key;
+						formData.metadata.put(metadatakey, metadata.getProperty(metadatakey));
+						
+					}
 					JsonObject json = new JsonObject();
 					json.addProperty("metadata", gson.toJson(formData.metadata));	// 3. Send the augmented metadata
 					json.addProperty("eventUUID", eventUUIDstring);
